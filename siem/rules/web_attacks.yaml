@@ -1,0 +1,103 @@
+rules:
+  - id: WEB_SERVER_ERROR
+    name: Web Server Error Spike
+    description: Multiple 5xx server errors detected
+    severity: 4
+    category: server_security
+    condition: any
+    patterns:
+      - field: status
+        regex: '^5\d{2}$'
+    threshold: 10
+    window: 60
+    tags:
+      - web
+      - server_error
+      - availability
+
+  - id: WEB_PATH_TRAVERSAL
+    name: Web Path Traversal Attempt
+    description: Path traversal pattern detected in HTTP request
+    severity: 5
+    category: web_attack
+    mitre_id: T1190
+    mitre_tactic: Initial Access
+    mitre_technique: Exploit Public-Facing Application
+    condition: any
+    patterns:
+      - field: path
+        regex: '\.\.\/|\.\.\\|%2e%2e|%252e%252e'
+    tags:
+      - web
+      - path_traversal
+      - attack
+
+  - id: WEB_ADMIN_ACCESS
+    name: Admin Panel Access Attempt
+    description: Attempt to access administrative interfaces
+    severity: 3
+    category: web_attack
+    mitre_id: T1190
+    mitre_tactic: Initial Access
+    mitre_technique: Exploit Public-Facing Application
+    condition: any
+    patterns:
+      - field: path
+        regex: '(?i)(admin|wp-admin|administrator|manage|backup|config|setup|install|phpmyadmin)'
+    tags:
+      - web
+      - admin_access
+      - enumeration
+
+  - id: WEB_SQL_INJECTION
+    name: SQL Injection Attempt
+    description: SQL injection patterns detected in HTTP request
+    severity: 6
+    category: web_attack
+    mitre_id: T1190
+    mitre_tactic: Initial Access
+    mitre_technique: Exploit Public-Facing Application
+    condition: any
+    patterns:
+      - field: path
+        regex: '(?i)(select.*from|union.*select|.*or.*1=1|--.*$|waitfor.*delay|pg_sleep)'
+    tags:
+      - web
+      - sqli
+      - critical
+
+  - id: WEB_XSS_ATTEMPT
+    name: XSS Attack Attempt
+    description: Cross-site scripting patterns detected in HTTP request
+    severity: 5
+    category: web_attack
+    mitre_id: T1189
+    mitre_tactic: Initial Access
+    mitre_technique: Drive-by Compromise
+    condition: any
+    patterns:
+      - field: path
+        regex: '(?i)(<script|<img.*onerror|<svg.*onload|javascript:|onclick=|onfocus=)'
+    tags:
+      - web
+      - xss
+      - attack
+
+  - id: WEB_DIRECTORY_BUSTING
+    name: Directory Busting Detection
+    description: Sequential 404 requests from single IP - directory enumeration
+    severity: 3
+    category: reconnaissance
+    mitre_id: T1046
+    mitre_tactic: Discovery
+    mitre_technique: Network Service Discovery
+    condition: match
+    patterns:
+      - field: status
+        regex: '^404$'
+    threshold: 20
+    window: 60
+    tags:
+      - web
+      - enumeration
+      - recon

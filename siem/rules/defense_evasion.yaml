@@ -1,0 +1,68 @@
+rules:
+  - id: LOG_CLEARED
+    name: Audit Log Cleared
+    description: Windows audit log has been cleared
+    severity: 7
+    category: defense_evasion
+    mitre_id: T1070
+    mitre_tactic: Defense Evasion
+    mitre_technique: Indicator Removal on Host
+    condition: match
+    patterns:
+      - field: event_id
+        regex: '^1102$|^104$'
+    tags:
+      - windows
+      - log_clearing
+      - critical
+      - incident
+
+  - id: FIREWALL_DISABLED
+    name: Firewall Disabled
+    description: Firewall service has been stopped or disabled
+    severity: 6
+    category: defense_evasion
+    mitre_id: T1562
+    mitre_tactic: Defense Evasion
+    mitre_technique: Impair Defenses
+    condition: any
+    patterns:
+      - field: raw
+        regex: '(?i)(firewall.*stop|firewall.*disable|iptables.*stop|ufw.*disable)'
+    tags:
+      - defense_evasion
+      - firewall
+
+  - id: AV_DISABLED
+    name: Antivirus Disabled
+    description: Antivirus or endpoint protection has been disabled
+    severity: 7
+    category: defense_evasion
+    mitre_id: T1562
+    mitre_tactic: Defense Evasion
+    mitre_technique: Impair Defenses
+    condition: any
+    patterns:
+      - field: raw
+        regex: '(?i)(antivirus.*disabled|defender.*disabled|security.*product.*disabled)'
+    tags:
+      - defense_evasion
+      - critical
+      - incident
+
+  - id: SERVICE_INSTALL_SUSPICIOUS
+    name: Suspicious Service Installation
+    description: A new Windows service was installed
+    severity: 5
+    category: persistence
+    mitre_id: T1543
+    mitre_tactic: Persistence
+    mitre_technique: Create or Modify System Process
+    condition: match
+    patterns:
+      - field: event_id
+        regex: '^7045$|^4697$'
+    tags:
+      - windows
+      - persistence
+      - service

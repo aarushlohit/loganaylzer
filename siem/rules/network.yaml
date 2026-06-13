@@ -1,0 +1,85 @@
+rules:
+  - id: PORT_SCAN_DETECTED
+    name: Port Scan Detected
+    description: Multiple connection attempts to different ports from single IP
+    severity: 3
+    category: reconnaissance
+    mitre_id: T1046
+    mitre_tactic: Discovery
+    mitre_technique: Network Service Discovery
+    condition: any
+    patterns:
+      - field: event_type
+        regex: port_scan
+    threshold: 10
+    window: 60
+    tags:
+      - network
+      - port_scan
+      - recon
+
+  - id: DNS_TUNNELING
+    name: DNS Tunneling Detection
+    description: Suspicious DNS queries indicating potential DNS tunneling
+    severity: 5
+    category: exfiltration
+    mitre_id: T1041
+    mitre_tactic: Exfiltration
+    mitre_technique: Exfiltration Over C2 Channel
+    condition: any
+    patterns:
+      - field: raw
+        regex: '(?i)(txt.*\.(?:xyz|top|club|work|loan|men|win|bid)|nslookup.*base64|dig.*\.[a-z]{2,3}\s+txt)'
+    tags:
+      - network
+      - dns
+      - tunneling
+      - exfiltration
+
+  - id: UNUSUAL_OUTBOUND
+    name: Unusual Outbound Connection
+    description: Outbound connection to unusual port or IP range
+    severity: 4
+    category: command_and_control
+    mitre_id: T1071
+    mitre_tactic: Command and Control
+    mitre_technique: Application Layer Protocol
+    condition: any
+    patterns:
+      - field: dst_port
+        regex: '^(4444|6666|6667|8443|1337|4443|8081|31337|444)$'
+    tags:
+      - network
+      - c2
+      - unusual_traffic
+
+  - id: DATA_EXFILTRATION_LARGE
+    name: Large Data Transfer
+    description: Large outbound data transfer detected
+    severity: 6
+    category: exfiltration
+    mitre_id: T1041
+    mitre_tactic: Exfiltration
+    mitre_technique: Exfiltration Over C2 Channel
+    expression: "e.get('size', 0) > 10000000 and 'POST' in e.get('method', '')"
+    tags:
+      - exfiltration
+      - data_loss
+      - critical
+
+  - id: REVERSE_SHELL
+    name: Reverse Shell Detection
+    description: Reverse shell indicators detected in traffic
+    severity: 7
+    category: command_and_control
+    mitre_id: T1071
+    mitre_tactic: Command and Control
+    mitre_technique: Application Layer Protocol
+    condition: any
+    patterns:
+      - field: raw
+        regex: '(?i)(bash.*>.*\/dev\/tcp\/|python.*reverse|nc.*-e\s+\/bin|powershell.*reverse|sh.*-i>&\/dev)'
+    tags:
+      - exploitation
+      - reverse_shell
+      - critical

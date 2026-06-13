@@ -1,0 +1,107 @@
+rules:
+  - id: SSH_BRUTE_FORCE
+    name: SSH Brute Force Attack
+    description: Multiple failed SSH login attempts detected from same source IP
+    severity: 5
+    category: credential_access
+    mitre_id: T1110
+    mitre_tactic: Credential Access
+    mitre_technique: Brute Force
+    condition: match
+    patterns:
+      - field: raw
+        regex: 'Failed password for.*from'
+    threshold: 5
+    window: 300
+    tags:
+      - ssh
+      - brute_force
+      - authentication
+
+  - id: SSH_BREAK_IN
+    name: SSH Break-in Attempt
+    description: Successful SSH login from previously attacking IP
+    severity: 7
+    category: credential_access
+    mitre_id: T1110
+    mitre_tactic: Credential Access
+    mitre_technique: Brute Force
+    condition: match
+    patterns:
+      - field: raw
+        regex: 'Accepted password for.*from'
+    tags:
+      - ssh
+      - critical
+      - break_in
+
+  - id: SSH_INVALID_USER
+    name: SSH Invalid User Attempt
+    description: Multiple SSH connections with invalid usernames
+    severity: 4
+    category: credential_access
+    mitre_id: T1110
+    mitre_tactic: Credential Access
+    mitre_technique: Brute Force
+    condition: match
+    patterns:
+      - field: raw
+        regex: 'Invalid user'
+    threshold: 3
+    window: 300
+    tags:
+      - ssh
+      - enumeration
+      - authentication
+
+  - id: AUTH_FAILED_BURST
+    name: Authentication Failure Burst
+    description: High volume of authentication failures from single source
+    severity: 4
+    category: credential_access
+    mitre_id: T1110
+    mitre_tactic: Credential Access
+    mitre_technique: Password Spraying
+    condition: any
+    patterns:
+      - field: raw
+        regex: '(?i)authentication failure|auth failure|failed login'
+    threshold: 10
+    window: 60
+    tags:
+      - authentication
+      - brute_force
+
+  - id: SUDO_PRIVILEGE_ESCALATION
+    name: Sudo Privilege Escalation
+    description: Sudo command execution detected
+    severity: 4
+    category: privilege_escalation
+    mitre_id: T1548
+    mitre_tactic: Privilege Escalation
+    mitre_technique: Abuse Elevation Control Mechanism
+    condition: match
+    patterns:
+      - field: event_type
+        regex: 'privilege_escalation'
+    tags:
+      - sudo
+      - privilege_escalation
+      - linux
+
+  - id: SUDO_ROOT_ACCESS
+    name: Sudo Root Access
+    description: User escalated to root via sudo
+    severity: 5
+    category: privilege_escalation
+    mitre_id: T1548
+    mitre_tactic: Privilege Escalation
+    mitre_technique: Abuse Elevation Control Mechanism
+    patterns:
+      - field: raw
+        regex: '(?i)(sudo|su\b).*root'
+    expression: "'root' in e.get('extra', {}).get('sudo_target', '') or 'root' in msg.lower()"
+    tags:
+      - sudo
+      - root
+      - critical
